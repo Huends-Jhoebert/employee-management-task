@@ -12,13 +12,8 @@ require("dotenv").config();
 // Connect to MongoDB
 connectDB();
 
-const corsOptions = {
-  origin:
-    "https://67a5de99d8039fcf3e6870cf--employee-management-task.netlify.app",
-};
-
 // Middleware
-app.use(cors(corsOptions));
+app.use(cors());
 app.use(express.json());
 
 // Routes
