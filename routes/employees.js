@@ -14,7 +14,7 @@ router.post("/", async (req, res) => {
       contactNumber,
       country,
       accountType,
-      photo,
+      photo = "",
     } = req.body;
 
     let photoUrl = "";
@@ -33,7 +33,7 @@ router.post("/", async (req, res) => {
       contactNumber,
       country,
       accountType,
-      photo: photoUrl == "" ? "" : photoUrl,
+      photo: photoUrl,
     };
 
     const newEmployee = new Employee({
