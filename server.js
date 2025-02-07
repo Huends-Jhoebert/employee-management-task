@@ -13,7 +13,8 @@ require("dotenv").config();
 connectDB();
 
 const corsOptions = {
-  origin: "http://localhost:5173",
+  origin:
+    "https://67a5de99d8039fcf3e6870cf--employee-management-task.netlify.app",
 };
 
 // Middleware
