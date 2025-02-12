@@ -3,6 +3,7 @@ const cors = require("cors");
 const connectDB = require("./config/db");
 const employeesRoutes = require("./routes/employees");
 const countiesRoutes = require("./routes/countries");
+const rateLimit = require("express-rate-limit");
 
 const app = express();
 
@@ -20,6 +21,15 @@ const isLocal = process.env.NODE_ENV === "development";
 if (isLocal) {
   allowedOrigins.push("http://localhost:5173"); // Allow localhost in development
 }
+
+// Create a rate limit rule
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
+  message: "Too many requests from this IP, please try again later.",
+});
+
+app.use(limiter); // Apply to all routes globally
 
 app.use(
   cors({
