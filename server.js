@@ -15,7 +15,7 @@ connectDB();
 // Define allowed origins
 const allowedOrigins = process.env.ALLOWED_ORIGINS.split(",");
 
-const isLocal = !process.env.NODE_ENV || process.env.NODE_ENV === "development";
+const isLocal = process.env.NODE_ENV === "development";
 
 if (isLocal) {
   allowedOrigins.push("http://localhost:5173"); // Allow localhost in development
