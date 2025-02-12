@@ -2,30 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Employee = require("../models/Employee");
 const { uploadImage } = require("../lib/cloudinary");
-
-// Utility function to check if the username, email, or contact number exists
-const checkIfExists = async (
-  username,
-  email,
-  contactNumber,
-  excludeId = null
-) => {
-  let query = {
-    $or: [
-      { "data.username": username }, // Check if username already exists
-      { "data.email": email }, // Check if email already exists
-      { "data.contactNumber": contactNumber }, // Check if contact number already exists
-    ],
-  };
-
-  // Exclude the current employee if updating (skip checking for the current employee's data)
-  if (excludeId) {
-    query["_id"] = { $ne: excludeId }; // Exclude current employee by ID
-  }
-
-  const existingEmployee = await Employee.find(query);
-  return existingEmployee;
-};
+const checkIfExists = require("../lib/checkIfExists");
 
 // Route to add a new employee
 router.post("/", async (req, res) => {
@@ -88,24 +65,37 @@ router.post("/", async (req, res) => {
 });
 
 // Route to get all employees
-router.get("/", async (req, res) => {
+router.get("/:currentPage/:limit", async (req, res) => {
   try {
-    const employees = await Employee.find();
+    // Extract `currentPage` and `limit` from `params`
+    const page = parseInt(req.params.currentPage) || 1;
+    const limit = parseInt(req.params.limit) || 10;
+    const skip = (page - 1) * limit;
 
-    // No need to decrypt the data anymore
+    // Fetch employees with pagination
+    const employees = await Employee.find().skip(skip).limit(limit);
+
+    // Get total employee count
+    const totalEmployees = await Employee.countDocuments();
+
+    // Map employees to return the correct structure
     const employeeList = employees.map((employee) => ({
-      ...employee.data, // Directly return the stored data
+      ...employee.data,
       id: employee._id,
     }));
 
-    res.status(200).json(employeeList);
+    res.status(200).json({
+      totalEmployees,
+      totalPages: Math.ceil(totalEmployees / limit),
+      currentPage: page,
+      employees: employeeList,
+    });
   } catch (error) {
     console.error("Error retrieving employees:", error);
     res.status(500).send("Server error");
   }
 });
 
-// Route to get a specific employee by ID
 // Route to update an employee by ID
 router.put("/:id", async (req, res) => {
   const employeeId = req.params.id;
